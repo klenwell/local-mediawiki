@@ -1,9 +1,14 @@
 #
+# Global Wiki Settings
+#
+wiki_domain: wiki.klenwell.localhost
+
+#
 # Role: geerlingguy.apache
 # https://github.com/geerlingguy/ansible-role-apache
 #
 apache_listen_port: 80
 apache_vhosts_filename: "local-mediawiki.conf"
 apache_vhosts:
-  - servername: "wiki.klenwell.localhost"
+  - servername: "{{ wiki_domain }}"
     documentroot: "/var/www/html"

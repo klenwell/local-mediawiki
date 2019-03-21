@@ -12,7 +12,8 @@
 ---
 - name: Set up Mediawiki wiki locally
   hosts: localhost
+  become: yes
   vars_files:
     - vars/main.yml
   roles:
-    - { role: geerlingguy.apache, become: true }
+    - geerlingguy.apache
