@@ -10,5 +10,8 @@
 # - http://docs.ansible.com/ansible/latest/galaxy.html#installing-multiple-roles-from-a-file
 #
 
+# Self signed certs for local HTTPS.
+- src: openmicroscopy.ssl-certificate
+
 # Installs Apache webserver.
 - src: geerlingguy.apache

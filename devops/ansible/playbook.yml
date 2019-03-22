@@ -15,5 +15,12 @@
   become: yes
   vars_files:
     - vars/main.yml
+  tasks:
+    - debug: msg="Project root is {{ project_root }}"
+    - lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1   {{ wiki_domain }}"
+        create: yes
   roles:
+    - openmicroscopy.ssl-certificate
     - geerlingguy.apache

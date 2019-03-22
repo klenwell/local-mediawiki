@@ -1,4 +1,5 @@
 *.retry
 .dev
 
+public
 devops/ansible/roles

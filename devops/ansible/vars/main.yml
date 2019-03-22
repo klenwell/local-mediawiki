@@ -2,6 +2,20 @@
 # Global Wiki Settings
 #
 wiki_domain: wiki.klenwell.localhost
+project_root: "{{ playbook_dir | dirname | dirname }}"
+public_root: "{{ project_root }}/public"
+
+#
+# Role: openmicroscopy.ssl-certificate
+# https://github.com/openmicroscopy/ansible-role-ssl-certificate
+#
+ssl_certificate_path: "{{ public_root }}/ssl"
+ssl_certificate_selfsigned_create: True
+ssl_certificate_public_path: "{{ ssl_certificate_path }}/server.crt"
+ssl_certificate_intermediate_path: "{{ ssl_certificate_path }}/intermediate.crt"
+ssl_certificate_bundled_path: "{{ ssl_certificate_path }}/bundled.crt"
+ssl_certificate_key_path: "{{ ssl_certificate_path }}/server.key"
+ssl_certificate_combined_path: "{{ ssl_certificate_path }}/combined.pem"
 
 #
 # Role: geerlingguy.apache
@@ -11,4 +25,9 @@ apache_listen_port: 80
 apache_vhosts_filename: "local-mediawiki.conf"
 apache_vhosts:
   - servername: "{{ wiki_domain }}"
-    documentroot: "/var/www/html"
+    documentroot: "{{ public_root }}"
+apache_vhosts_ssl:
+  - servername: "{{ wiki_domain }}"
+    documentroot: "{{ public_root }}"
+    certificate_file: "{{ ssl_certificate_public_path }}"
+    certificate_key_file: "{{ ssl_certificate_key_path }}"
