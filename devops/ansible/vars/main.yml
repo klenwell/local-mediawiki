@@ -1,13 +1,18 @@
 #
 # Global Wiki Settings
 #
+# You'll want to modify these to match your preferences/environment.
 wiki_domain: wiki.klenwell.localhost
+wiki_db_name_user_pw: klenwell_mediawiki
+mysql_root_pw: secret
+
+# These should not need to be modified.
 project_root: "{{ playbook_dir | dirname | dirname }}"
 public_root: "{{ project_root }}/public"
 
 #
 # Role: openmicroscopy.ssl-certificate
-# https://github.com/openmicroscopy/ansible-role-ssl-certificate
+# https://galaxy.ansible.com/openmicroscopy/ssl-certificate
 #
 ssl_certificate_path: "{{ public_root }}/ssl"
 ssl_certificate_selfsigned_create: True
@@ -19,7 +24,7 @@ ssl_certificate_combined_path: "{{ ssl_certificate_path }}/combined.pem"
 
 #
 # Role: geerlingguy.apache
-# https://github.com/geerlingguy/ansible-role-apache
+# https://galaxy.ansible.com/geerlingguy/apache
 #
 apache_listen_port: 80
 apache_vhosts_filename: "local-mediawiki.conf"
@@ -31,3 +36,20 @@ apache_vhosts_ssl:
     documentroot: "{{ public_root }}"
     certificate_file: "{{ ssl_certificate_public_path }}"
     certificate_key_file: "{{ ssl_certificate_key_path }}"
+
+#
+#
+# Role: geerlingguy.mysql
+# https://galaxy.ansible.com/geerlingguy/mysql
+#
+overwrite_global_mycnf: false
+mysql_root_password: "{{ mysql_root_pw }}"
+mysql_databases:
+  - name: "{{ wiki_db_name_user_pw }}"
+    encoding: latin1
+    collation: latin1_general_ci
+mysql_users:
+  - name: "{{ wiki_db_name_user_pw }}"
+    password: "{{ wiki_db_name_user_pw }}"
+    host: "%"
+    priv: "{{ wiki_db_name_user_pw }}.*:ALL"

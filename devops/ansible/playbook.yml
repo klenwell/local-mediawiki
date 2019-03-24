@@ -24,3 +24,4 @@
   roles:
     - openmicroscopy.ssl-certificate
     - geerlingguy.apache
+    - geerlingguy.mysql
