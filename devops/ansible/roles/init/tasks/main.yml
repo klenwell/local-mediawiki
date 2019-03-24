@@ -1,0 +1,26 @@
+# roles/init/tasks/main.yml
+---
+# http://docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts
+#- name: Dump ansible_facts
+#  debug: var=ansible_facts
+
+- name: Confirm project root path
+  debug: msg="Project root is {{ project_root }}"
+
+- name: "Create public directory {{ public_root }}"
+  file: path="{{ public_root }}" state=directory
+  register: public_directory_created
+
+- name: "Add wiki domain {{ wiki_domain }} to /etc/hosts"
+  lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.1   {{ wiki_domain }}"
+    create: yes
+  become: yes
+
+- name: Install html to verify Apache webserver is running
+  template:
+    src: apache.html.j2
+    dest: "{{ public_root }}/apache.html"
+    force: no
+    mode: 0644

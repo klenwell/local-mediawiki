@@ -2,12 +2,6 @@
 # To run playbook:
 #   ansible-playbook playbook.yml --ask-become-pass -v
 #
-# To run specific roles, add tag dev:
-#   - { role: wiki, tags: dev }
-# Then run playbook with --tags option:
-#   ansible-playbook ansible-desktop.yml --ask-become-pass --tags dev -v
-#
-# Source: https://github.com/Benoth/ansible-ubuntu/blob/1786382/ansible-desktop.yml
 #
 ---
 - name: Set up Mediawiki wiki locally
@@ -15,13 +9,8 @@
   become: yes
   vars_files:
     - vars/main.yml
-  tasks:
-    - debug: msg="Project root is {{ project_root }}"
-    - lineinfile:
-        path: /etc/hosts
-        line: "127.0.0.1   {{ wiki_domain }}"
-        create: yes
   roles:
+    - { role: init, become: no }
     - openmicroscopy.ssl-certificate
     - geerlingguy.apache
     - geerlingguy.mysql
