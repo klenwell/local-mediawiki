@@ -1,5 +1,6 @@
 *.retry
 .dev
 
+mediawiki
 public
 devops/ansible/roles
