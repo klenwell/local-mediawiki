@@ -3,7 +3,10 @@
 #
 # You'll want to modify these to match your preferences/environment.
 wiki_domain: wiki.klenwell.localhost
+wiki_name: "Klenwell Local Wiki"
 wiki_db_name_user_pw: klenwell_mediawiki
+wiki_admin_user: Admin
+wiki_admin_pw: admin123
 mysql_root_pw: secret
 
 # Check here for latest stable release: https://www.mediawiki.org/wiki/Download

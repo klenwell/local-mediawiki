@@ -1,0 +1,35 @@
+# roles/init/tasks/main.yml
+---
+- name: Create mediawiki directory
+  file:
+    path: "{{ mediawiki_dir }}"
+    state: directory
+
+- name: Download Mediawiki and unzip
+  unarchive:
+    src: "{{ mediawiki_source }}"
+    dest: "{{ mediawiki_dir }}"
+    remote_src: yes
+    creates: "{{ mediawiki_dir }}/mediawiki-{{ mediawiki_version }}"
+
+- name: Link Mediawiki to webserver document root
+  file:
+    src: "{{ mediawiki_dir }}/mediawiki-{{ mediawiki_version }}"
+    dest: "{{ public_root }}/mediawiki"
+    state: link
+
+- name: Runs Mediawiki install script
+  shell: >
+    php maintenance/install.php
+    --dbserver="localhost"
+    --dbname={{ wiki_db_name_user_pw }}
+    --dbuser={{ wiki_db_name_user_pw }}
+    --dbpass={{ wiki_db_name_user_pw }}
+    --server="https://{{ wiki_domain }}"
+    --scriptpath=/mediawiki
+    --lang=en
+    --pass={{ wiki_admin_pw }}
+    "{{ wiki_name }}"
+    "{{ wiki_admin_user }}"
+  args:
+    chdir: "{{ public_root }}/mediawiki/"
