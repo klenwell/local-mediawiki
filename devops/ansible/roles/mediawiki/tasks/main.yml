@@ -33,3 +33,4 @@
     "{{ wiki_admin_user }}"
   args:
     chdir: "{{ public_root }}/mediawiki/"
+    creates: "{{ public_root }}/mediawiki/LocalSettings.php"
