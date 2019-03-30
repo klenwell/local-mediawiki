@@ -29,6 +29,7 @@
     --scriptpath=/mediawiki
     --lang=en
     --pass={{ wiki_admin_pw }}
+    --with-extensions
     "{{ wiki_name }}"
     "{{ wiki_admin_user }}"
   args:
