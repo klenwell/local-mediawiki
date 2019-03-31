@@ -2,5 +2,6 @@
 .dev
 
 mediawiki
-public
 devops/ansible/roles
+devops/downloads
+installed

@@ -16,8 +16,15 @@ mediawiki_release: 0
 
 # These should not need to be modified.
 project_root: "{{ playbook_dir | dirname | dirname }}"
-public_root: "{{ project_root }}/public"
-mediawiki_dir: "{{ project_root }}/mediawiki"
+devops_dir:
+  root: "{{ project_root }}/devops"
+  downloads: "{{ project_root }}/devops/downloads"
+installed_dir:
+  root: "{{ project_root }}/installed"
+  web: "{{ project_root }}/installed/web"
+  logs: "{{ project_root }}/installed/logs"
+  ssl: "{{ project_root }}/installed/ssl"
+  mediawiki: "{{ project_root }}/installed/web/mediawiki"
 mediawiki_version: "{{ mediawiki_major }}.{{ mediawiki_minor }}.{{ mediawiki_release }}"
 mediawiki_source: "https://releases.wikimedia.org/mediawiki/{{ mediawiki_major}}.{{ mediawiki_minor }}/mediawiki-{{ mediawiki_version }}.tar.gz"
 
@@ -25,7 +32,7 @@ mediawiki_source: "https://releases.wikimedia.org/mediawiki/{{ mediawiki_major}}
 # Role: openmicroscopy.ssl-certificate
 # https://galaxy.ansible.com/openmicroscopy/ssl-certificate
 #
-ssl_certificate_path: "{{ public_root }}/ssl"
+ssl_certificate_path: "{{ installed_dir.ssl }}"
 ssl_certificate_selfsigned_create: True
 ssl_certificate_public_path: "{{ ssl_certificate_path }}/server.crt"
 ssl_certificate_intermediate_path: "{{ ssl_certificate_path }}/intermediate.crt"
@@ -39,14 +46,22 @@ ssl_certificate_combined_path: "{{ ssl_certificate_path }}/combined.pem"
 #
 apache_listen_port: 80
 apache_vhosts_filename: "local-mediawiki.conf"
+apache_servername: "{{ wiki_domain }}"
+apache_documentroot: "{{ installed_dir.web }}"
 apache_vhosts:
   - servername: "{{ wiki_domain }}"
-    documentroot: "{{ public_root }}"
+    documentroot: "{{ installed_dir.web }}"
+    extra_parameters: |
+      CustomLog {{ installed_dir.logs }}/apache-access.log combined
+      ErrorLog {{ installed_dir.logs }}/apache-error.log
 apache_vhosts_ssl:
   - servername: "{{ wiki_domain }}"
-    documentroot: "{{ public_root }}"
+    documentroot: "{{ installed_dir.web }}"
     certificate_file: "{{ ssl_certificate_public_path }}"
     certificate_key_file: "{{ ssl_certificate_key_path }}"
+    extra_parameters: |
+      CustomLog {{ installed_dir.logs }}/apache-ssl-access.log combined
+      ErrorLog {{ installed_dir.logs }}/apache-ssl-error.log
 
 #
 #
