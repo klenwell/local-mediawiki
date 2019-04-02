@@ -33,8 +33,8 @@
 #    src: "{{ devops_dir.downloads }}/GoogleLogin"
 #    dest: "{{ installed_dir.mediawiki }}/extensions/GoogleLogin"
 #    remote_src: yes
-- name: Copy GoogleLogin extension to webserver document root (using command)
-  shell: cp -r {{ devops_dir.downloads }}/GoogleLogin {{ installed_dir.mediawiki }}/extensions
+#- name: Copy GoogleLogin extension to webserver document root (using command)
+#  shell: cp -r {{ devops_dir.downloads }}/GoogleLogin {{ installed_dir.mediawiki }}/extensions
 
 - name: Runs Mediawiki install script
   shell: >
@@ -53,3 +53,31 @@
   args:
     chdir: "{{ installed_dir.mediawiki }}"
     creates: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+
+- name: Set Wiki edit permissions
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Edit Permissions"
+    block: |
+      # Prevent new user registrations except by sysops
+      $wgGroupPermissions['*']['createaccount'] = false;
+      $wgGroupPermissions['sysop']['createaccount'] = true;
+
+      # Disable page create, read, edit by anonymous users
+      $wgGroupPermissions['*']['createpage'] = false;
+      $wgGroupPermissions['*']['read'] = true;
+      $wgGroupPermissions['*']['edit'] = false;
+
+- name: Set Wiki debug permissions
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Debug Permissions"
+    block: |
+      # Debugging options in mediaWiki
+      $wgShowExceptionDetails = true;
+      #$wgDebugToolbar = true;
+      #$wgShowDebug = true;
+      $wgDebugLogFile = "{{ project_root }}/installed/logs/mediawiki.log";
+
+- name: Install new logo
+  shell: cp {{ devops_dir.root }}/files/wiki-logo-160x160.png {{ installed_dir.mediawiki }}/resources/assets/wiki.png

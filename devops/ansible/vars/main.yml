@@ -54,6 +54,8 @@ apache_vhosts:
     extra_parameters: |
       CustomLog {{ installed_dir.logs }}/apache-access.log combined
       ErrorLog {{ installed_dir.logs }}/apache-error.log
+      php_flag log_errors on
+      php_value error_log {{ installed_dir.logs }}/php-error.log
 apache_vhosts_ssl:
   - servername: "{{ wiki_domain }}"
     documentroot: "{{ installed_dir.web }}"
@@ -62,6 +64,9 @@ apache_vhosts_ssl:
     extra_parameters: |
       CustomLog {{ installed_dir.logs }}/apache-ssl-access.log combined
       ErrorLog {{ installed_dir.logs }}/apache-ssl-error.log
+      php_flag log_errors on
+      php_value error_log {{ installed_dir.logs }}/php-error.log
+
 
 #
 #
