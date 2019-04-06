@@ -54,6 +54,15 @@
     chdir: "{{ installed_dir.mediawiki }}"
     creates: "{{ installed_dir.mediawiki }}/LocalSettings.php"
 
+- name: Set article path for pretty URLs to /{{ wiki_short_url_path }}
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Article Path"
+    block: |
+      # Needs to be coordinated with Apache rewrite settings
+      # https://www.mediawiki.org/wiki/Manual:Short_URL/Apache
+      $wgArticlePath = "/{{ wiki_short_url_path }}/$1";
+
 - name: Set Wiki edit permissions
   blockinfile:
     path: "{{ installed_dir.mediawiki }}/LocalSettings.php"

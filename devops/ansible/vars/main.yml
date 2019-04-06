@@ -4,6 +4,7 @@
 # You'll want to modify these to match your preferences/environment.
 wiki_domain: wiki.klenwell.localhost
 wiki_name: "Klenwell Local Wiki"
+wiki_short_url_path: view
 wiki_db_name_user_pw: klenwell_mediawiki
 wiki_admin_user: Admin
 wiki_admin_pw: admin123
@@ -52,21 +53,48 @@ apache_vhosts:
   - servername: "{{ wiki_domain }}"
     documentroot: "{{ installed_dir.web }}"
     extra_parameters: |
+      ## Log Settings
       CustomLog {{ installed_dir.logs }}/apache-access.log combined
       ErrorLog {{ installed_dir.logs }}/apache-error.log
       php_flag log_errors on
       php_value error_log {{ installed_dir.logs }}/php-error.log
+
+      ## Log Settings
+      CustomLog {{ installed_dir.logs }}/apache-ssl-access.log combined
+      ErrorLog {{ installed_dir.logs }}/apache-ssl-error.log
+      php_flag log_errors on
+      php_value error_log {{ installed_dir.logs }}/php-error.log
+
+      ## http://www.mediawiki.org/wiki/Manual:Short_URL/Apache
+      # Enable the rewrite engine
+      RewriteEngine On
+
+      # Short URL for wiki pages
+      RewriteRule ^/?{{ wiki_short_url_path }}(/.*)?$ {{ installed_dir.mediawiki }}/index.php [L]
+
+      # Redirect / to Main Page
+      RewriteRule ^/*$ {{ installed_dir.mediawiki }}/index.php [L]
 apache_vhosts_ssl:
   - servername: "{{ wiki_domain }}"
     documentroot: "{{ installed_dir.web }}"
     certificate_file: "{{ ssl_certificate_public_path }}"
     certificate_key_file: "{{ ssl_certificate_key_path }}"
     extra_parameters: |
+      ## Log Settings
       CustomLog {{ installed_dir.logs }}/apache-ssl-access.log combined
       ErrorLog {{ installed_dir.logs }}/apache-ssl-error.log
       php_flag log_errors on
       php_value error_log {{ installed_dir.logs }}/php-error.log
 
+      ## http://www.mediawiki.org/wiki/Manual:Short_URL/Apache
+      # Enable the rewrite engine
+      RewriteEngine On
+
+      # Short URL for wiki pages
+      RewriteRule ^/?{{ wiki_short_url_path }}(/.*)?$ {{ installed_dir.mediawiki }}/index.php [L]
+
+      # Redirect / to Main Page
+      RewriteRule ^/*$ {{ installed_dir.mediawiki }}/index.php [L]
 
 #
 #
