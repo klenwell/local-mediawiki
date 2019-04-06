@@ -90,3 +90,16 @@
 
 - name: Install new logo
   shell: cp {{ devops_dir.root }}/files/wiki-logo-160x160.png {{ installed_dir.mediawiki }}/resources/assets/wiki.png
+
+#
+# Install Favicon
+#
+- name: Install favicon file
+  shell: cp {{ devops_dir.root }}/files/favicon.ico {{ installed_dir.mediawiki }}/resources/assets/favicon.ico
+
+- name: Configure mediawiki favicon settings
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Favicon"
+    block: |
+      $wgFavicon = "/mediawiki/resources/assets/favicon.ico";
