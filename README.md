@@ -2,26 +2,33 @@
 
 Quickly set up a Mediawiki wiki in your local environment. It will install the new site in a directory `installed/web` under the project's root directory.
 
+It has only been fully tested on my Ubuntu workstation, which may have already included some required packages.
 
-## Installation
+
+## Installation / Usage
 
 1. Clone this repo.
 
     ```
     git clone https://github.com/klenwell/local-mediawiki.git
-    cd local-mediawiki
     ```
 
-2. Review and adjust settings in `devops/ansible/var/main.yml`.
-
-3. Run playbook.
+1. Install required Ansible packages
 
     ```
-    cd devops/ansible
+    cd local-mediawiki/devops/ansible
+    ansible-galaxy install -r requirements.yml
+    ```
+
+1. Review and adjust settings in `devops/ansible/vars/main.yml`.
+
+1. Run playbook.
+
+    ```
     ansible-playbook playbook.yml --ask-become-pass -v
     ```
 
-4. Site should be accessilbe. Default:
+1. Site should be accessible at `https://{{ wiki_domain }}/`. Default:
 
     - https://wiki.klenwell.localhost/
 

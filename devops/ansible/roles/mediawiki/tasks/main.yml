@@ -21,21 +21,6 @@
 - name: Copy Mediawiki to webserver document root (using command)
   shell: cp -r {{ devops_dir.downloads }}/mediawiki-{{ mediawiki_version }}/* {{ installed_dir.mediawiki }}
 
-- name: Download GoogleLogin extension
-  unarchive:
-    src: https://extdist.wmflabs.org/dist/extensions/GoogleLogin-REL1_32-0b27530.tar.gz
-    dest: "{{ devops_dir.downloads }}"
-    remote_src: yes
-    creates: "{{ devops_dir.downloads }}/GoogleLogin"
-
-#- name: Copy GoogleLogin extension to webserver document root
-#  copy:
-#    src: "{{ devops_dir.downloads }}/GoogleLogin"
-#    dest: "{{ installed_dir.mediawiki }}/extensions/GoogleLogin"
-#    remote_src: yes
-#- name: Copy GoogleLogin extension to webserver document root (using command)
-#  shell: cp -r {{ devops_dir.downloads }}/GoogleLogin {{ installed_dir.mediawiki }}/extensions
-
 - name: Runs Mediawiki install script
   shell: >
     php maintenance/install.php
