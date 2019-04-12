@@ -1,0 +1,23 @@
+#
+# Ansible Requirement Files
+# Imports third-party roles.
+#
+# Usage:
+#   ansible-galaxy install -r requirements.yml
+#
+# References:
+# - https://stackoverflow.com/a/30176625/6763239
+# - http://docs.ansible.com/ansible/latest/galaxy.html#installing-multiple-roles-from-a-file
+#
+
+# Self signed certs for local HTTPS.
+- src: openmicroscopy.ssl-certificate
+
+# Installs Apache webserver.
+- src: geerlingguy.apache
+
+# Install MySQL and creates wiki database.
+- src: geerlingguy.mysql
+
+# Install PHP
+- src: geerlingguy.php

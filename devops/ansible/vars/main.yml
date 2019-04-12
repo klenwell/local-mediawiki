@@ -1,0 +1,114 @@
+#
+# Global Wiki Settings
+#
+# You'll want to modify these to match your preferences/environment.
+wiki_domain: wiki.klenwell.localhost
+wiki_name: "Klenwell Local Wiki"
+wiki_short_url_path: view
+wiki_db_name_user_pw: klenwell_mediawiki
+wiki_admin_user: Admin
+wiki_admin_pw: admin123
+mysql_root_pw: secret
+
+# Check here for latest stable release: https://www.mediawiki.org/wiki/Download
+mediawiki_major: 1
+mediawiki_minor: 32
+mediawiki_release: 0
+
+# These should not need to be modified.
+project_root: "{{ playbook_dir | dirname | dirname }}"
+devops_dir:
+  root: "{{ project_root }}/devops"
+  downloads: "{{ project_root }}/devops/downloads"
+installed_dir:
+  root: "{{ project_root }}/installed"
+  web: "{{ project_root }}/installed/web"
+  logs: "{{ project_root }}/installed/logs"
+  ssl: "{{ project_root }}/installed/ssl"
+  mediawiki: "{{ project_root }}/installed/web/mediawiki"
+mediawiki_version: "{{ mediawiki_major }}.{{ mediawiki_minor }}.{{ mediawiki_release }}"
+mediawiki_source: "https://releases.wikimedia.org/mediawiki/{{ mediawiki_major}}.{{ mediawiki_minor }}/mediawiki-{{ mediawiki_version }}.tar.gz"
+
+#
+# Role: openmicroscopy.ssl-certificate
+# https://galaxy.ansible.com/openmicroscopy/ssl-certificate
+#
+ssl_certificate_path: "{{ installed_dir.ssl }}"
+ssl_certificate_selfsigned_create: True
+ssl_certificate_public_path: "{{ ssl_certificate_path }}/server.crt"
+ssl_certificate_intermediate_path: "{{ ssl_certificate_path }}/intermediate.crt"
+ssl_certificate_bundled_path: "{{ ssl_certificate_path }}/bundled.crt"
+ssl_certificate_key_path: "{{ ssl_certificate_path }}/server.key"
+ssl_certificate_combined_path: "{{ ssl_certificate_path }}/combined.pem"
+
+#
+# Role: geerlingguy.apache
+# https://galaxy.ansible.com/geerlingguy/apache
+#
+apache_listen_port: 80
+apache_vhosts_filename: "local-mediawiki.conf"
+apache_servername: "{{ wiki_domain }}"
+apache_documentroot: "{{ installed_dir.web }}"
+apache_vhosts:
+  - servername: "{{ wiki_domain }}"
+    documentroot: "{{ installed_dir.web }}"
+    extra_parameters: |
+      ## Log Settings
+      CustomLog {{ installed_dir.logs }}/apache-access.log combined
+      ErrorLog {{ installed_dir.logs }}/apache-error.log
+      php_flag log_errors on
+      php_value error_log {{ installed_dir.logs }}/php-error.log
+
+      ## Log Settings
+      CustomLog {{ installed_dir.logs }}/apache-ssl-access.log combined
+      ErrorLog {{ installed_dir.logs }}/apache-ssl-error.log
+      php_flag log_errors on
+      php_value error_log {{ installed_dir.logs }}/php-error.log
+
+      ## http://www.mediawiki.org/wiki/Manual:Short_URL/Apache
+      # Enable the rewrite engine
+      RewriteEngine On
+
+      # Short URL for wiki pages
+      RewriteRule ^/?{{ wiki_short_url_path }}(/.*)?$ {{ installed_dir.mediawiki }}/index.php [L]
+
+      # Redirect / to Main Page
+      RewriteRule ^/*$ {{ installed_dir.mediawiki }}/index.php [L]
+apache_vhosts_ssl:
+  - servername: "{{ wiki_domain }}"
+    documentroot: "{{ installed_dir.web }}"
+    certificate_file: "{{ ssl_certificate_public_path }}"
+    certificate_key_file: "{{ ssl_certificate_key_path }}"
+    extra_parameters: |
+      ## Log Settings
+      CustomLog {{ installed_dir.logs }}/apache-ssl-access.log combined
+      ErrorLog {{ installed_dir.logs }}/apache-ssl-error.log
+      php_flag log_errors on
+      php_value error_log {{ installed_dir.logs }}/php-error.log
+
+      ## http://www.mediawiki.org/wiki/Manual:Short_URL/Apache
+      # Enable the rewrite engine
+      RewriteEngine On
+
+      # Short URL for wiki pages
+      RewriteRule ^/?{{ wiki_short_url_path }}(/.*)?$ {{ installed_dir.mediawiki }}/index.php [L]
+
+      # Redirect / to Main Page
+      RewriteRule ^/*$ {{ installed_dir.mediawiki }}/index.php [L]
+
+#
+#
+# Role: geerlingguy.mysql
+# https://galaxy.ansible.com/geerlingguy/mysql
+#
+overwrite_global_mycnf: false
+mysql_root_password: "{{ mysql_root_pw }}"
+mysql_databases:
+  - name: "{{ wiki_db_name_user_pw }}"
+    encoding: latin1
+    collation: latin1_general_ci
+mysql_users:
+  - name: "{{ wiki_db_name_user_pw }}"
+    password: "{{ wiki_db_name_user_pw }}"
+    host: "%"
+    priv: "{{ wiki_db_name_user_pw }}.*:ALL"

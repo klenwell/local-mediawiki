@@ -1,0 +1,18 @@
+#
+# To run playbook:
+#   ansible-playbook playbook.yml --ask-become-pass -v
+#
+#
+---
+- name: Set up Mediawiki wiki locally
+  hosts: localhost
+  become: yes
+  vars_files:
+    - vars/main.yml
+  roles:
+    - init
+    - openmicroscopy.ssl-certificate
+    - geerlingguy.apache
+    - geerlingguy.mysql
+    - geerlingguy.php
+    - mediawiki

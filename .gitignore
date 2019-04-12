@@ -1,0 +1,7 @@
+*.retry
+.dev
+
+mediawiki
+devops/ansible/roles
+devops/downloads
+installed

@@ -1,0 +1,90 @@
+# roles/init/tasks/main.yml
+---
+- name: Create mediawiki directory
+  file:
+    path: "{{ installed_dir.mediawiki }}"
+    state: directory
+
+- name: Download Mediawiki and unzip
+  unarchive:
+    src: "{{ mediawiki_source }}"
+    dest: "{{ devops_dir.downloads }}"
+    remote_src: yes
+    creates: "{{ devops_dir.downloads }}/mediawiki-{{ mediawiki_version }}"
+
+# Recursive copy will not work until Ansible 2.8
+#- name: Copy Mediawiki to webserver document root
+#  copy:
+#    src: "{{ devops_dir.downloads }}/mediawiki-{{ mediawiki_version }}"
+#    dest: "{{ installed_dir.mediawiki }}"
+#    remote_src: yes
+- name: Copy Mediawiki to webserver document root (using command)
+  shell: cp -r {{ devops_dir.downloads }}/mediawiki-{{ mediawiki_version }}/* {{ installed_dir.mediawiki }}
+
+- name: Runs Mediawiki install script
+  shell: >
+    php maintenance/install.php
+    --dbserver="localhost"
+    --dbname={{ wiki_db_name_user_pw }}
+    --dbuser={{ wiki_db_name_user_pw }}
+    --dbpass={{ wiki_db_name_user_pw }}
+    --server="https://{{ wiki_domain }}"
+    --scriptpath=/mediawiki
+    --lang=en
+    --pass={{ wiki_admin_pw }}
+    --with-extensions
+    "{{ wiki_name }}"
+    "{{ wiki_admin_user }}"
+  args:
+    chdir: "{{ installed_dir.mediawiki }}"
+    creates: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+
+- name: Set article path for pretty URLs to /{{ wiki_short_url_path }}
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Article Path"
+    block: |
+      # Needs to be coordinated with Apache rewrite settings
+      # https://www.mediawiki.org/wiki/Manual:Short_URL/Apache
+      $wgArticlePath = "/{{ wiki_short_url_path }}/$1";
+
+- name: Set Wiki edit permissions
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Edit Permissions"
+    block: |
+      # Prevent new user registrations except by sysops
+      $wgGroupPermissions['*']['createaccount'] = false;
+      $wgGroupPermissions['sysop']['createaccount'] = true;
+
+      # Disable page create, read, edit by anonymous users
+      $wgGroupPermissions['*']['createpage'] = false;
+      $wgGroupPermissions['*']['read'] = true;
+      $wgGroupPermissions['*']['edit'] = false;
+
+- name: Set Wiki debug permissions
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Debug Permissions"
+    block: |
+      # Debugging options in mediaWiki
+      $wgShowExceptionDetails = true;
+      #$wgDebugToolbar = true;
+      #$wgShowDebug = true;
+      $wgDebugLogFile = "{{ project_root }}/installed/logs/mediawiki.log";
+
+- name: Install new logo
+  shell: cp {{ devops_dir.root }}/files/wiki-logo-160x160.png {{ installed_dir.mediawiki }}/resources/assets/wiki.png
+
+#
+# Install Favicon
+#
+- name: Install favicon file
+  shell: cp {{ devops_dir.root }}/files/favicon.ico {{ installed_dir.mediawiki }}/resources/assets/favicon.ico
+
+- name: Configure mediawiki favicon settings
+  blockinfile:
+    path: "{{ installed_dir.mediawiki }}/LocalSettings.php"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Favicon"
+    block: |
+      $wgFavicon = "/mediawiki/resources/assets/favicon.ico";

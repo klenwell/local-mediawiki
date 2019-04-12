@@ -1,0 +1,39 @@
+# roles/init/tasks/main.yml
+---
+# http://docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts
+#- name: Dump ansible_facts
+#  debug: var=ansible_facts
+
+- name: Confirm project root path
+  debug: msg="Project root is {{ project_root }}"
+
+- name: "Create devops downloads directory {{ devops_dir.downloads }}"
+  file: path="{{ devops_dir.downloads }}" state=directory
+
+- name: "Create installed drectories"
+  file: path="{{ item }}" state=directory
+  with_items:
+    - "{{ installed_dir.root }}"
+    - "{{ installed_dir.web }}"
+    - "{{ installed_dir.logs }}"
+    - "{{ installed_dir.mediawiki }}"
+
+- name: "Add wiki domain {{ wiki_domain }} to /etc/hosts"
+  lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.1   {{ wiki_domain }}"
+    create: yes
+
+- name: Install html file to verify Apache webserver is running
+  template:
+    src: apache.html.j2
+    dest: "{{ installed_dir.web }}/apache.html"
+    force: no
+    mode: 0644
+
+- name: Install PHP file to verify PHP is enabled
+  template:
+    src: info.php.j2
+    dest: "{{ installed_dir.web }}/info.php"
+    force: no
+    mode: 0644
